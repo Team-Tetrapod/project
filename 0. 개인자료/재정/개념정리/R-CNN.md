@@ -1,8 +1,35 @@
+# 들어가기 전 용어 정리
+
+![1569570839776](R-CNN.assets/1569570839776.png)
+
+- Instance segmentation
+
+  - Classification
+    - 입력 영상에 대한 Class 예측
+  - Localization/Detection
+    - Class를 예측하면서 물체의 공간을 예측
+  - Semantic segmentation 
+    - 영상 내의 모든 픽셀을 class 예측
+  - Instance segmentation
+    - 같은 class 예측 시에도 객체를 서로 구별로 정리를 할수가 있음.
+
+- Region proposal
+
+  - 객체가 있을 법한 공간을 제시하는 알고리즘
+  - cf) R CNN은 Selective Search 알고리즘을 사용
+
+- 참고자료
+
+  [https://geunsuheo.github.io/deep%20learning/maskrcnn/](https://geunsuheo.github.io/deep learning/maskrcnn/)
+
+  (Computer vision 용어 정리 및 R CNN 개념)
+
 # R-CNN(Regions with Convolution Neural Network)
 
 - 정의
-  - 기존의 descriptor를 이용한 Image dection 방식에서, descriptor의 역할을 CNN이 대체하자는 것
-
+  
+- 기존의 descriptor를 이용한 Image dection 방식에서, descriptor의 역할을 CNN이 대체하자는 것
+  
 - 과정
 
   1) Region proposal algorithm
@@ -93,6 +120,30 @@ https://yamalab.tistory.com/110
 
 
 # Mask R-CNN
+
+- 정의
+
+  - Faster RCNN에서 구간 안에 픽셀이 객체인지 아닌지를 판단하는 Binary Mask를 병행하여 추가하고 ROI Pooling 대신 ROI Align을 사용
+
+- 과정
+
+  - Binary Mask
+
+    ![1569573501576](R-CNN.assets/1569573501576.png)
+
+- 참고자료
+
+  https://medium.com/@vijendra1125/custom-mask-rcnn-using-tensorflow-object-detection-api-101149ce0765
+
+  (Mask R-CNN 학습 방법)
+
+  https://github.com/abreheret/PixelAnnotationTool
+
+  (Mask R-CNN 학습 software 툴)
+
+  https://github.com/matterport/Mask_RCNN
+
+  (Mask R-CNN 코드 구현 github)
 
 
 
