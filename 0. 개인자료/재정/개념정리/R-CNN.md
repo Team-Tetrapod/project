@@ -28,7 +28,7 @@
 
 - 정의
   
-- 기존의 descriptor를 이용한 Image dection 방식에서, descriptor의 역할을 CNN이 대체하자는 것
+  - 기존의 descriptor를 이용한 Image dection 방식에서, descriptor의 역할을 CNN이 대체하자는 것
   
 - 과정
 
@@ -144,6 +144,33 @@ https://yamalab.tistory.com/110
   https://github.com/matterport/Mask_RCNN
 
   (Mask R-CNN 코드 구현 github)
+
+
+
+
+
+# YOLO
+
+- 정의
+  - 
+- 과정
+  - 
+- 참고자료
+
+
+
+# R-CNN vs YOLO
+
+![1569914170027](R-CNN.assets/1569914170027.png)
+
+- R-CNN
+  - Proposal 방식은 영상에서 수많은 제안(proposal)을 하는 Selective Search로 2.24초 소요.
+- YOLO
+  - Selective Search에서 한 발 나아가서 엣지 정보를 바탕으로 엣지 박스를 찾으면 proposal의 수가 훨씬 적어짐.
+  - 0.38초 소요.
+  - 실시간성을 확보하기 위해 Proposal의 수가 적은 grid 방식을 더욱 발전시켜서 사용.
+
+
 
 
 
