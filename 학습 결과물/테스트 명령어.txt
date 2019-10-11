@@ -1,0 +1,2 @@
+﻿./darknet detector test <경로>/computer.data <경로>/yolov3-computer.cfg <경로>/yolov3-computer.weights <경로>/test_image.png
+./darknet detector test cfg/computer.data cfg/yolov3-computer.cfg backup/yolov3-computer.backup ~/work/my_voc_data/JPEGImages/379.png

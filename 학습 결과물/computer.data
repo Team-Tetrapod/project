@@ -1,0 +1,5 @@
+classes = 5
+train = ../work/my_voc_data/train.txt
+valid = ../work/my_voc_data/test.txt
+names = ../work/my_voc_data/voc.names
+backup = backup/
