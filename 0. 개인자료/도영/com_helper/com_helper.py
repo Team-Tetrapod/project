@@ -32,9 +32,9 @@ def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
 
 def rcnn_video(video_name):
     video= video_name
-    weights ="C:/Users/user/Desktop/yolo_object/yolov3-computer.weights"
-    config = "C:/Users/user/Desktop/yolo_object/yolov3-computer.cfg"
-    argclasses = "C:/Users/user/Desktop/yolo_object/yolov3-computer.txt"
+    weights ="C:/Users/Kyujin/Desktop/Project/project/0. 개인자료/도영/com_helper/yolov3-computer.weights"
+    config = "C:/Users/Kyujin/Desktop/Project/project/0. 개인자료/도영/com_helper/yolov3-computer.cfg"
+    argclasses = "C:/Users/Kyujin/Desktop/Project/project/0. 개인자료/도영/com_helper/yolov3-computer.txt"
     cap_video = cv2.VideoCapture(video)
 
     count = 0
