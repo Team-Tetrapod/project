@@ -1,10 +1,12 @@
-
 import cv2
 import sys
 from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 from PyQt5 import QtGui
 import numpy as np
+
+classes = None
+COLORS = None
 
 def get_output_layers(net):
     layer_names = net.getLayerNames()
@@ -20,19 +22,25 @@ def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
     cv2.rectangle(img, (x,y), (x_plus_w,y_plus_h), color, 2)
     cv2.putText(img, label, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-video_name = "0001.mp4"
 
 class ShowVideo(QtCore.QObject):
 
     flag = 0
 
-    camera = cv2.VideoCapture(video_name)
+    video = "0001.mp4"
+    weights ="yolov3-computer.weights"
+    config = "yolov3-computer.cfg"
+    argclasses = "yolov3-computer.txt"
 
-    ret, image = camera.read()
+    cap_video = cv2.VideoCapture(video)
+
+    ret, image = cap_video.read()
     height, width = image.shape[:2]
 
     VideoSignal1 = QtCore.pyqtSignal(QtGui.QImage)
     VideoSignal2 = QtCore.pyqtSignal(QtGui.QImage)
+
+    
 
     def __init__(self, parent=None):
         super(ShowVideo, self).__init__(parent)
@@ -40,19 +48,14 @@ class ShowVideo(QtCore.QObject):
     @QtCore.pyqtSlot()
     def startVideo(self):
         global image
-        global video_name
-
-        video = video_name
-        weights ="yolov3-computer.weights"
-        config = "yolov3-computer.cfg"
-        argclasses = "yolov3-computer.txt"
-        cap_video = cv2.VideoCapture(video)
-
-        count = 0
+        global classes
+        global COLORS
 
         run_video = True
+        
         while run_video:
-            ret, image = self.camera.read()
+            ret, image = self.cap_video.read()
+            # image = cv2.resize(image, (256,256))
             color_swapped_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
             qt_image1 = QtGui.QImage(color_swapped_image.data,
@@ -63,12 +66,10 @@ class ShowVideo(QtCore.QObject):
             self.VideoSignal1.emit(qt_image1)
 
 
-            if self.flag:                
-                image = cv2.resize(image, (512,512))
-                if ret == False:
-                    break
-                count +=1
-                if int(self.camera.get(1) % 10 == 0):
+            if self.flag:
+                if int(self.cap_video.get(1) % 10 == 0):
+                    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
                     Width = image.shape[1]
                     Height = image.shape[0]
                     print(Width, Height)
@@ -76,12 +77,12 @@ class ShowVideo(QtCore.QObject):
 
                     classes = None
 
-                    with open(argclasses, 'r') as f:
+                    with open(ShowVideo.argclasses, 'r') as f:
                         classes = [line.strip() for line in f.readlines()]
 
                     COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 
-                    net = cv2.dnn.readNet(weights, config)
+                    net = cv2.dnn.readNet(ShowVideo.weights, ShowVideo.config)
 
                     blob = cv2.dnn.blobFromImage(image, scale, (512,512), (0,0,0), True, crop=False)
 
@@ -122,21 +123,15 @@ class ShowVideo(QtCore.QObject):
                         w = box[2]
                         h = box[3]
                         draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
-                    frame = image
-                    return frame
-                
-                    # cv2.imshow("object detection", frame)
-                    # cv2.waitKey(1)
-                img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                img_canny = cv2.Canny(img_gray, 50, 100)
+                    ###########################
 
-                qt_image2 = QtGui.QImage(img_canny.data,
-                                         self.width,
-                                         self.height,
-                                         img_canny.strides[0],
-                                         QtGui.QImage.Format_Grayscale8)
+                    qt_image2 = QtGui.QImage(image.data,
+                                            self.width,
+                                            self.height,
+                                            image.strides[0],
+                                            QtGui.QImage.Format_Grayscale8)
 
-                self.VideoSignal2.emit(qt_image2)
+                    self.VideoSignal2.emit(qt_image2)
 
 
             loop = QtCore.QEventLoop()
