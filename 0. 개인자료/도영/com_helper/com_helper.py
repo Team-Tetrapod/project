@@ -4,10 +4,10 @@ import argparse
 import numpy as np
 import os
 
-ap = argparse.ArgumentParser()
-ap.add_argument('-v', '--video', required=True,
-                help = 'path to input video')
-args = ap.parse_args()
+# ap = argparse.ArgumentParser()
+# ap.add_argument('-v', '--video', required=True,
+#                 help = 'path to input video')
+# args = ap.parse_args()
 
 
 def get_output_layers(net):
@@ -29,80 +29,83 @@ def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
 
     cv2.putText(img, label, (x-10,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-# video= "C:/Users/user/Desktop/yolo_object/MSI_B360M.mp4"
-weights ="C:/Users/user/Desktop/yolo_object/yolov3-computer.weights"
-config = "C:/Users/user/Desktop/yolo_object/yolov3-computer.cfg"
-argclasses = "C:/Users/user/Desktop/yolo_object/yolov3-computer.txt"
-cap_video = cv2.VideoCapture(args.video)
 
-count = 0
+def rcnn_video(video_name):
+    video= video_name
+    weights ="C:/Users/user/Desktop/yolo_object/yolov3-computer.weights"
+    config = "C:/Users/user/Desktop/yolo_object/yolov3-computer.cfg"
+    argclasses = "C:/Users/user/Desktop/yolo_object/yolov3-computer.txt"
+    cap_video = cv2.VideoCapture(video)
 
-while True:
-    ret, frame = cap_video.read()
-    frame= cv2.resize(frame, (512,512))
-    if ret == False:
-        break
-    count +=1
-    if int(cap_video.get(1) % 10 == 0):
-        image = frame
+    count = 0
 
-        Width = image.shape[1]
-        Height = image.shape[0]
-        print(Width, Height)
-        scale = 0.00392
+    while True:
+        ret, frame = cap_video.read()
+        frame= cv2.resize(frame, (512,512))
+        if ret == False:
+            break
+        count +=1
+        if int(cap_video.get(1) % 10 == 0):
+            image = frame
 
-        classes = None
+            Width = image.shape[1]
+            Height = image.shape[0]
+            print(Width, Height)
+            scale = 0.00392
 
-        with open(argclasses, 'r') as f:
-            classes = [line.strip() for line in f.readlines()]
+            classes = None
 
-        COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
+            with open(argclasses, 'r') as f:
+                classes = [line.strip() for line in f.readlines()]
 
-        net = cv2.dnn.readNet(weights, config)
+            COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 
-        blob = cv2.dnn.blobFromImage(image, scale, (512,512), (0,0,0), True, crop=False)
+            net = cv2.dnn.readNet(weights, config)
 
-        net.setInput(blob)
+            blob = cv2.dnn.blobFromImage(image, scale, (512,512), (0,0,0), True, crop=False)
 
-        outs = net.forward(get_output_layers(net))
+            net.setInput(blob)
 
-        class_ids = []
-        confidences = []
-        boxes = []
-        conf_threshold = 0.5
-        nms_threshold = 0.4
+            outs = net.forward(get_output_layers(net))
 
-        for out in outs:
-            for detection in out:
-                scores = detection[5:]
-                class_id = np.argmax(scores)
-                confidence = scores[class_id]
-                if confidence > 0.5:
-                    center_x = int(detection[0] * Width)
-                    center_y = int(detection[1] * Height)
-                    w = int(detection[2] * Width)
-                    h = int(detection[3] * Height)
-                    x = center_x - w / 2
-                    y = center_y - h / 2
-                    class_ids.append(class_id)
-                    confidences.append(float(confidence))
-                    boxes.append([x, y, w, h])
+            class_ids = []
+            confidences = []
+            boxes = []
+            conf_threshold = 0.5
+            nms_threshold = 0.4
+
+            for out in outs:
+                for detection in out:
+                    scores = detection[5:]
+                    class_id = np.argmax(scores)
+                    confidence = scores[class_id]
+                    if confidence > 0.5:
+                        center_x = int(detection[0] * Width)
+                        center_y = int(detection[1] * Height)
+                        w = int(detection[2] * Width)
+                        h = int(detection[3] * Height)
+                        x = center_x - w / 2
+                        y = center_y - h / 2
+                        class_ids.append(class_id)
+                        confidences.append(float(confidence))
+                        boxes.append([x, y, w, h])
 
 
-        indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+            indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
 
-        for i in indices:
-            i = i[0]
-            box = boxes[i]
-            x = box[0]
-            y = box[1]
-            w = box[2]
-            h = box[3]
-            draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
-        frame = image
-
-        cv2.imshow("object detection", frame)
-        cv2.waitKey(1)
+            for i in indices:
+                i = i[0]
+                box = boxes[i]
+                x = box[0]
+                y = box[1]
+                w = box[2]
+                h = box[3]
+                draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
+            frame = image
+            return frame
+        
+            # cv2.imshow("object detection", frame)
+            # cv2.waitKey(1)
 
 # cv2.imwrite("object-detection.jpg", image)
 # cv2.destroyAllWindows()
