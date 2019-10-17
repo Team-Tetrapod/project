@@ -7,6 +7,7 @@ import numpy as np
 
 classes = None
 COLORS = None
+images1 = None
 
 def get_output_layers(net):
     layer_names = net.getLayerNames()
@@ -34,8 +35,8 @@ class ShowVideo(QtCore.QObject):
 
     cap_video = cv2.VideoCapture(video)
 
-    ret, image = cap_video.read()
-    height, width = image.shape[:2]
+    ret, image1 = cap_video.read()
+    height, width = image1.shape[:2]
 
     VideoSignal1 = QtCore.pyqtSignal(QtGui.QImage)
     VideoSignal2 = QtCore.pyqtSignal(QtGui.QImage)
@@ -47,91 +48,90 @@ class ShowVideo(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def startVideo(self):
-        global image
+        global image1
         global classes
         global COLORS
 
         run_video = True
         
         while run_video:
-            ret, image = self.cap_video.read()
-            # image = cv2.resize(image, (256,256))
-            color_swapped_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            ret, image1 = self.cap_video.read()
+            # image1 = cv2.resize(image1, (256,256))
+            color_swapped_image1 = cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
 
-            qt_image1 = QtGui.QImage(color_swapped_image.data,
+            qt_image1 = QtGui.QImage(color_swapped_image1.data,
                                     self.width,
                                     self.height,
-                                    color_swapped_image.strides[0],
+                                    color_swapped_image1.strides[0],
                                     QtGui.QImage.Format_RGB888)
             self.VideoSignal1.emit(qt_image1)
 
 
             if self.flag:
-                if int(self.cap_video.get(1) % 10 == 0):
-                    img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                image2 = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
 
-                    Width = image.shape[1]
-                    Height = image.shape[0]
-                    print(Width, Height)
-                    scale = 0.00392
+                Width = image2.shape[1]
+                Height = image2.shape[0]
+                print(Width, Height)
+                scale = 0.00392
 
-                    classes = None
+                classes = None
 
-                    with open(ShowVideo.argclasses, 'r') as f:
-                        classes = [line.strip() for line in f.readlines()]
+                with open(ShowVideo.argclasses, 'r') as f:
+                    classes = [line.strip() for line in f.readlines()]
 
-                    COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
+                COLORS = np.random.uniform(0, 255, size=(len(classes), 3))
 
-                    net = cv2.dnn.readNet(ShowVideo.weights, ShowVideo.config)
+                net = cv2.dnn.readNet(ShowVideo.weights, ShowVideo.config)
 
-                    blob = cv2.dnn.blobFromImage(image, scale, (512,512), (0,0,0), True, crop=False)
+                blob = cv2.dnn.blobFromImage(image2, scale, (512,512), (0,0,0), True, crop=False)
 
-                    net.setInput(blob)
+                net.setInput(blob)
 
-                    outs = net.forward(get_output_layers(net))
+                outs = net.forward(get_output_layers(net))
 
-                    class_ids = []
-                    confidences = []
-                    boxes = []
-                    conf_threshold = 0.5
-                    nms_threshold = 0.4
+                class_ids = []
+                confidences = []
+                boxes = []
+                conf_threshold = 0.5
+                nms_threshold = 0.4
 
-                    for out in outs:
-                        for detection in out:
-                            scores = detection[5:]
-                            class_id = np.argmax(scores)
-                            confidence = scores[class_id]
-                            if confidence > 0.5:
-                                center_x = int(detection[0] * Width)
-                                center_y = int(detection[1] * Height)
-                                w = int(detection[2] * Width)
-                                h = int(detection[3] * Height)
-                                x = center_x - w / 2
-                                y = center_y - h / 2
-                                class_ids.append(class_id)
-                                confidences.append(float(confidence))
-                                boxes.append([x, y, w, h])
+                for out in outs:
+                    for detection in out:
+                        scores = detection[5:]
+                        class_id = np.argmax(scores)
+                        confidence = scores[class_id]
+                        if confidence > 0.5:
+                            center_x = int(detection[0] * Width)
+                            center_y = int(detection[1] * Height)
+                            w = int(detection[2] * Width)
+                            h = int(detection[3] * Height)
+                            x = center_x - w / 2
+                            y = center_y - h / 2
+                            class_ids.append(class_id)
+                            confidences.append(float(confidence))
+                            boxes.append([x, y, w, h])
 
 
-                    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+                indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
 
-                    for i in indices:
-                        i = i[0]
-                        box = boxes[i]
-                        x = box[0]
-                        y = box[1]
-                        w = box[2]
-                        h = box[3]
-                        draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
-                    ###########################
+                for i in indices:
+                    i = i[0]
+                    box = boxes[i]
+                    x = box[0]
+                    y = box[1]
+                    w = box[2]
+                    h = box[3]
+                    draw_prediction(image2, class_ids[i], confidences[i], round(x), round(y), round(x+w), round(y+h))
+                ###########################
 
-                    qt_image2 = QtGui.QImage(image.data,
-                                            self.width,
-                                            self.height,
-                                            image.strides[0],
-                                            QtGui.QImage.Format_Grayscale8)
+                qt_image2 = QtGui.QImage(image2.data,
+                                        self.width,
+                                        self.height,
+                                        image2.strides[0],
+                                        QtGui.QImage.Format_Grayscale8)
 
-                    self.VideoSignal2.emit(qt_image2)
+                self.VideoSignal2.emit(qt_image2)
 
 
             loop = QtCore.QEventLoop()

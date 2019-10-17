@@ -9,3 +9,7 @@ cfg/yolov3-computer.cfg
 cfg/yolov3-computer.z01
 cfg/yolov3-computer.z02
 cfg/yolov3-computer.zip
+*.weights
+*.pyc
+*.suo
+*.sqlite
