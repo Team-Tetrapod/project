@@ -31,15 +31,14 @@ class Form(QtWidgets.QDialog):
 
         self.ui.show()
 
-        # self.ui.previewSmall.setPixmap(QPixmap('cat04_256.png'))
-    
+            
     def start(self):
         pass
     def end(self):
         pass
     def fileopen(self):
-        pass
-
+        fname = QFileDialog.getOpenFileName()
+        print(fname)
 
 
 
