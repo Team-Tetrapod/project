@@ -180,7 +180,7 @@ if __name__ == '__main__':
     vid.VideoSignal2.connect(image_viewer2.setImage)
 
     push_button1 = QtWidgets.QPushButton('Start')
-    push_button2 = QtWidgets.QPushButton('Canny')
+    push_button2 = QtWidgets.QPushButton('Yolo detection')
     push_button1.clicked.connect(vid.startVideo)
     push_button2.clicked.connect(vid.canny)
 

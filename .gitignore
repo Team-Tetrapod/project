@@ -13,3 +13,5 @@ cfg/yolov3-computer.zip
 *.pyc
 *.suo
 *.sqlite
+*.mp4
+*.avi
